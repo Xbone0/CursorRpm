@@ -40,3 +40,8 @@ mkdir -pv ~/rpmbuild/{BUILD,SPECS,BUILDROOT,SOURCES,RPMS,SRPMS}
 ```
 ~/rpmbuild/RPMS/x86_64/
 ```
+
+## 关于构建deb包，请参考：
+```
+https://gist.github.com/jonson/7720118c3deb8bba470f61466dac906a
+```
