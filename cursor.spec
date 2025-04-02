@@ -1,13 +1,19 @@
+%global version_is_defined %{expand:%%{?version:1}%%{!?version:0}}
+
+%if %{version_is_defined} == 0
+%{error: 版本未指定！请通过 --define "version X.X.X" 传递版本号}
+%endif
+
 Name:           cursor
-Version:        0.47.9
-Summary:        Cursor Code Editor
+Version:        %{version}
 Release:        1%{?dist}
+Summary:        Cursor Code Editor
 License:        Proprietary
 URL:            https://cursor.sh/
-Source0:        Cursor-0.47.9-x86_64.AppImage
+Source0:        Cursor-%{version}-x86_64.AppImage
 
 BuildArch:      x86_64
-AutoReqProv:    yes  # 启用自动依赖检测
+AutoReqProv:    yes
 Requires:       libX11, libXext, libxcb, libXrender, gtk3, glibc, libXScrnSaver, libXtst, libnotify, libatomic, libappindicator-gtk3, nss
 
 %description
@@ -25,21 +31,43 @@ mkdir -p %{buildroot}/opt/Cursor
 cp -r squashfs-root/usr/share/cursor/* %{buildroot}/opt/Cursor/
 chmod +x %{buildroot}/opt/Cursor/cursor
 
-# 设置快捷方式
-install -D -m 644 squashfs-root/usr/share/applications/cursor.desktop \
-    %{buildroot}/usr/share/applications/cursor.desktop
-# 使用 sed 替换所有 Exec 条目
-sed -i \
-    -e 's#^Exec\s*=\s*cursor\([ \t]\)#Exec=/opt/Cursor/cursor\1#g' \       # 替换主 Exec
-    -e 's#^Exec\s*=\s*cursor --new-window#Exec=/opt/Cursor/cursor --new-window#g' \  # 替换 Action Exec
-    %{buildroot}/usr/share/applications/cursor.desktop
+mkdir -p %{buildroot}/usr/share/applications
+cat > %{buildroot}/usr/share/applications/cursor.desktop <<EOF
+[Desktop Entry]
+Name=Cursor
+Comment=The AI Code Editor.
+GenericName=Text Editor
+Exec=/opt/Cursor/cursor %F
+Icon=cursor
+Type=Application
+StartupNotify=false
+StartupWMClass=Cursor
+Categories=TextEditor;Development;IDE;
+MimeType=application/x-cursor-workspace;
+Actions=new-empty-window;
+Keywords=cursor;
+X-AppImage-Version=%{version}
+
+[Desktop Action new-empty-window]
+Name=New Empty Window
+Name[de]=Neues leeres Fenster
+Name[es]=Nueva ventana vacía
+Name[fr]=Nouvelle fenêtre vide
+Name[it]=Nuova finestra vuota
+Name[ja]=新しい空のウィンドウ
+Name[ko]=새 빈 창
+Name[ru]=Новое пустое окно
+Name[zh_CN]=新建空窗口
+Name[zh_TW]=開新空視窗
+Exec=/opt/Cursor/cursor --new-window %F
+Icon=cursor
+EOF
 chmod +x %{buildroot}/usr/share/applications/cursor.desktop
 
-# 安装图标
-find squashfs-root/usr/share/icons/hicolor -maxdepth 1 -type d -name "*x*" | while read -r icon_dir; do
-    size=$(basename "$icon_dir")
-    install -D -m 755 "$icon_dir/apps/cursor.png" \
-        "%{buildroot}/usr/share/icons/hicolor/${size}/apps/cursor.png"
+for size in 22 24 32 48 64 128 256 512; do
+  mkdir -p %{buildroot}/usr/share/icons/hicolor/${size}x${size}/apps
+  install -D -m 644 squashfs-root/usr/share/icons/hicolor/${size}x${size}/apps/cursor.png \
+        "%{buildroot}/usr/share/icons/hicolor/${size}x${size}/apps/cursor.png"
 done
 
 %post
@@ -51,8 +79,8 @@ update-desktop-database %{_datadir}/applications >/dev/null 2>&1 || :
 %files
 /opt/Cursor/
 /usr/share/applications/cursor.desktop
-/usr/share/icons/hicolor/256x256/apps/cursor.png
+/usr/share/icons/hicolor/*x*/apps/cursor.png
 
 %changelog
-* Mon Mar 31 2025 He Gao <10340396@zte.com.cn> - 0.47.9-1
-- 初始 RPM 包，修复路径和权限问题
+* Mon Mar 31 2025 He Gao <10340396@zte.com.cn> - %{version}-%{release}
+- Build RPM package for Cursor, version %{version}
