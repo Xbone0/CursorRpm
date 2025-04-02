@@ -36,10 +36,7 @@ mkdir -pv ~/rpmbuild/{BUILD,SPECS,BUILDROOT,SOURCES,RPMS,SRPMS}
 ```
 ~/rpmbuild/RPMS/x86_64/
 ```
-同时将生成 zip 包：
-```
-~/rpmbuild/RPMS/x86_64/
-```
+同时将于rpmbuild下生成 zip 包：
 
 ## 关于构建deb包，请参考：
 ```
