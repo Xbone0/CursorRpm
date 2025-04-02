@@ -25,15 +25,15 @@ mkdir -p %{buildroot}/opt/Cursor
 cp -r squashfs-root/usr/share/cursor/* %{buildroot}/opt/Cursor/
 chmod +x %{buildroot}/opt/Cursor/cursor
 
+# 设置快捷方式
 install -D -m 644 squashfs-root/usr/share/applications/cursor.desktop \
     %{buildroot}/usr/share/applications/cursor.desktop
-
-# 使用 sed 替换所有 Exec 和 Icon 条目
+# 使用 sed 替换所有 Exec 条目
 sed -i \
     -e 's#^Exec\s*=\s*cursor\([ \t]\)#Exec=/opt/Cursor/cursor\1#g' \       # 替换主 Exec
     -e 's#^Exec\s*=\s*cursor --new-window#Exec=/opt/Cursor/cursor --new-window#g' \  # 替换 Action Exec
-    -e 's#^Icon\s*=\s*co\.anysphere\.cursor#Icon=/usr/share/icons/hicolor/256x256/apps/cursor.png#g' \  # 替换 Icon
     %{buildroot}/usr/share/applications/cursor.desktop
+chmod +x %{buildroot}/usr/share/applications/cursor.desktop
 
 # 安装图标
 find squashfs-root/usr/share/icons/hicolor -maxdepth 1 -type d -name "*x*" | while read -r icon_dir; do
@@ -54,5 +54,5 @@ update-desktop-database %{_datadir}/applications >/dev/null 2>&1 || :
 /usr/share/icons/hicolor/256x256/apps/cursor.png
 
 %changelog
-* Mon Mar 31 2025 xbone - 0.47.9-1
+* Mon Mar 31 2025 He Gao <10340396@zte.com.cn> - 0.47.9-1
 - 初始 RPM 包，修复路径和权限问题
